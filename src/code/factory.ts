@@ -1,4 +1,3 @@
 export interface Factory<T> {
-    make(json: any): T
-  }
-  
+  make(json: any): T;
+}
