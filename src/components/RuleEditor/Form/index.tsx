@@ -77,12 +77,12 @@ const SelectField = ({
 export const Form = () => {
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
-      name: "",
-      startDate: "",
-      endDate: "",
-      startTime: "",
-      endTime: "",
-      weekdays: [],
+      name: "Hej",
+      startDate: "2020-01-01",
+      endDate: "2020-01-01",
+      startTime: "03:00:00",
+      endTime: "07:23:00",
+      weekdays: [Weekdays.Monday, Weekdays.Tuesday, Weekdays.Wednesday, Weekdays.Thursday, Weekdays.Friday, Weekdays.Saturday, Weekdays.Sunday],
       state: true,
     },
   });
@@ -100,7 +100,7 @@ export const Form = () => {
       });
 
       // Stringify JSON output for easy copying
-      console.log(JSON.stringify(rule, null, 2));
+      console.log(rule.formatted());
       reset();
 
       // TODO: Add rule to store or send to API - for now, we just console log it.
@@ -108,7 +108,6 @@ export const Form = () => {
       console.error("Error creating rule:", error);
     }
   };
-
   return (
     <div>
       <form className="rule-form" onSubmit={handleSubmit(onSubmit)}>

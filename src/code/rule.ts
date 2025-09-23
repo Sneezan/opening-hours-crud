@@ -1,6 +1,6 @@
-import { formatDate, formatTime } from "./datetime";
 import type { Factory } from "./factory";
 import { Weekdays } from "./weekdays";
+import { formatDate, formatTime } from "./datetime";
 
 export interface RuleInit<T> {
   name: string;
@@ -39,21 +39,22 @@ export class Rule<T> {
 
   // Converting bit flags to "readable" weekday names
   getWeekdayNames(): string | string[] {
+
     if (this.weekdays === Weekdays.All) {
       return "Weekdays.All";
     }
 
     const names = Object.entries(Weekdays)
-      .filter(
-        ([name, value]) =>
-          name !== "All" && typeof value === "number" && (this.weekdays & value) === value,
+      .filter(([name, value]) => 
+        name !== 'All' && typeof value === 'number' && (this.weekdays & value) === value
       )
       .map(([name]) => `Weekdays.${name}`);
 
     return names.length === 1 ? names[0] : names;
   }
 
-  toJSON() {
+
+  formatted() {
     return {
       name: this.name,
       startDate: formatDate(this.startDate),
@@ -65,6 +66,7 @@ export class Rule<T> {
       payload: this.payload,
     };
   }
+  
 
   static getFactory<T>(): Factory<Rule<T>> {
     return new (class implements Factory<Rule<T>> {
@@ -74,3 +76,4 @@ export class Rule<T> {
     })();
   }
 }
+
