@@ -6,4 +6,9 @@ export class Rules<T> {
   constructor(rules: Rule<T>[]) {
     this.rules = rules;
   }
+
+  addRule(rule: Rule<T>) {
+    this.rules.push(rule);
+    return this;
+  }
 }

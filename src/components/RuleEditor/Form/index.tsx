@@ -1,10 +1,11 @@
+import { useState } from "react";
 import { type Control, Controller, useForm } from "react-hook-form";
-import { parseDate, parseTime } from "../../../code/datetime";
-import { Rule, type RuleInit } from "../../../code/rule";
+import { parseRuleDates } from "../../../code/datetime";
+import { Rule, type RuleConfig } from "../../../code/rule";
+import { Rules } from "../../../code/rules";
 import { Weekdays } from "../../../code/weekdays";
 
-type FormData = RuleInit<unknown> & {
-  name: string;
+type FormData = RuleConfig<unknown> & {
   startDate: string;
   endDate: string;
   startTime: string;
@@ -75,35 +76,55 @@ const SelectField = ({
 );
 
 export const Form = () => {
+  const [ruleArray, setRuleArray] = useState<Rules<any>>(new Rules([]));
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: {
-      name: "Hej",
       startDate: "2020-01-01",
       endDate: "2020-01-01",
-      startTime: "03:00:00",
-      endTime: "07:23:00",
-      weekdays: [Weekdays.Monday, Weekdays.Tuesday, Weekdays.Wednesday, Weekdays.Thursday, Weekdays.Friday, Weekdays.Saturday, Weekdays.Sunday],
+      startTime: "",
+      endTime: "",
+      weekdays: [
+        Weekdays.Monday,
+        Weekdays.Tuesday,
+        Weekdays.Wednesday,
+        Weekdays.Thursday,
+        Weekdays.Friday,
+        Weekdays.Saturday,
+        Weekdays.Sunday,
+      ],
       state: true,
     },
   });
 
   const onSubmit = (data: FormData) => {
+    const weekdaysValue = data.weekdays.reduce((acc, val) => acc | val, 0);
+
+    // Parse datetime strings to Date objects
+    const { startDate, endDate, startTime, endTime } = parseRuleDates(
+      data.startDate,
+      data.endDate,
+      data.startTime,
+      data.endTime,
+    );
+
     try {
       const rule = new Rule({
-        name: data.name,
-        startDate: parseDate(data.startDate),
-        endDate: parseDate(data.endDate),
-        startTime: parseTime(data.startTime),
-        endTime: parseTime(data.endTime),
-        weekdays: data.weekdays,
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        weekdays: weekdaysValue,
         state: data.state,
+        payload: data.payload,
       });
 
-      // Stringify JSON output for easy copying
-      console.log(rule.formatted());
-      reset();
+      console.log("Just added rule:", rule);
 
-      // TODO: Add rule to store or send to API - for now, we just console log it.
+      const upDatedRuleArray = new Rules(ruleArray.rules).addRule(rule);
+      setRuleArray(upDatedRuleArray);
+
+      console.log("Updated rules:", upDatedRuleArray);
+      reset();
     } catch (error) {
       console.error("Error creating rule:", error);
     }
@@ -113,13 +134,6 @@ export const Form = () => {
       <form className="rule-form" onSubmit={handleSubmit(onSubmit)}>
         <fieldset>
           <legend>Rule Configuration</legend>
-
-          <FormField
-            name="name"
-            control={control}
-            label="Rule Name"
-            placeholder="Enter rule name"
-          />
           <FormField name="startDate" control={control} label="Start Date" type="date" />
           <FormField name="endDate" control={control} label="End Date" type="date" />
           <FormField name="startTime" control={control} label="Start Time" type="time" />
