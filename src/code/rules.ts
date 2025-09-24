@@ -11,4 +11,14 @@ export class Rules<T> {
     this.rules.push(rule);
     return this;
   }
+
+  updateRule(index: number, rule: Rule<T>) {
+    if (index >= 0 && index < this.rules.length) {
+      this.rules[index] = rule;
+      return this;
+    }
+    throw new Error(
+      `Index ${index} is out of bounds for rules array of length ${this.rules.length}`,
+    );
+  }
 }

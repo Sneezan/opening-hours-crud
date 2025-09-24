@@ -1,100 +1,59 @@
-import { useState } from "react";
-import { type Control, Controller, useForm } from "react-hook-form";
-import { parseRuleDates } from "../../../code/datetime";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { formatDate, formatRules, formatTime, parseRuleDates } from "../../../code/datetime";
 import { Rule, type RuleConfig } from "../../../code/rule";
 import { Rules } from "../../../code/rules";
-import { Weekdays } from "../../../code/weekdays";
+import { getWeekdayEnums, getWeekdayFormData, type Weekdays } from "../../../code/weekdays";
+import { FormField } from "./components/FormField";
+import { SelectField } from "./components/SelectField";
+import type { FormData } from "./types";
 
-type FormData = RuleConfig<unknown> & {
-  startDate: string;
-  endDate: string;
-  startTime: string;
-  endTime: string;
-  weekdays: Weekdays[];
-  state: boolean;
+const DEFAULT_FORM_VALUES: FormData = {
+  startDate: "",
+  endDate: "",
+  startTime: "",
+  endTime: "",
+  weekdays: [],
+  state: true,
 };
 
-// Helper component for form fields
-const FormField = ({
-  name,
-  control,
-  label,
-  type = "text",
-  placeholder,
+export const Form = ({
+  rules,
+  setRules,
+  editingRule,
+  editingIndex,
+  onCancelEdit,
 }: {
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  type?: string;
-  placeholder?: string;
-}) => (
-  <div className="form-group">
-    <label htmlFor={name}>{label}</label>
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
-        <input
-          {...field}
-          type={type}
-          id={name}
-          placeholder={placeholder}
-          value={(field.value as string) || ""}
-        />
-      )}
-    />
-  </div>
-);
-
-const SelectField = ({
-  name,
-  control,
-  label,
-  options,
-}: {
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  options: { value: string; label: string }[];
-}) => (
-  <div className="form-group">
-    <label htmlFor={name}>{label}</label>
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
-        <select {...field} value={field.value ? "true" : "false"} id={name}>
-          {options.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
-      )}
-    />
-  </div>
-);
-
-export const Form = () => {
-  const [ruleArray, setRuleArray] = useState<Rules<any>>(new Rules([]));
+  rules: Rules<any>;
+  setRules: (rules: Rules<any>) => void;
+  editingRule: Rule<any> | null;
+  editingIndex: number | null;
+  onCancelEdit: () => void;
+}) => {
   const { control, handleSubmit, reset } = useForm<FormData>({
-    defaultValues: {
-      startDate: "2020-01-01",
-      endDate: "2020-01-01",
-      startTime: "",
-      endTime: "",
-      weekdays: [
-        Weekdays.Monday,
-        Weekdays.Tuesday,
-        Weekdays.Wednesday,
-        Weekdays.Thursday,
-        Weekdays.Friday,
-        Weekdays.Saturday,
-        Weekdays.Sunday,
-      ],
-      state: true,
-    },
+    defaultValues: DEFAULT_FORM_VALUES,
   });
+
+  // Populate form when editing
+  useEffect(() => {
+    if (editingRule) {
+      const startDate = formatDate(editingRule.startDate);
+      const endDate = formatDate(editingRule.endDate);
+      const startTime = formatTime(editingRule.startTime);
+      const endTime = formatTime(editingRule.endTime);
+      const weekdaysArray = getWeekdayEnums(editingRule.weekdays);
+
+      reset({
+        startDate,
+        endDate,
+        startTime,
+        endTime,
+        weekdays: weekdaysArray,
+        state: editingRule.state,
+        payload: editingRule.payload,
+      });
+    }
+  }, [editingRule, reset]);
 
   const onSubmit = (data: FormData) => {
     const weekdaysValue = data.weekdays.reduce((acc, val) => acc | val, 0);
@@ -108,7 +67,8 @@ export const Form = () => {
     );
 
     try {
-      const rule = new Rule({
+      const ruleFactory = Rule.getFactory<RuleConfig<unknown>>();
+      const newRule = ruleFactory.make({
         startDate,
         endDate,
         startTime,
@@ -118,17 +78,27 @@ export const Form = () => {
         payload: data.payload,
       });
 
-      console.log("Just added rule:", rule);
+      const updatedRules = new Rules([...rules.rules]);
 
-      const upDatedRuleArray = new Rules(ruleArray.rules).addRule(rule);
-      setRuleArray(upDatedRuleArray);
-
-      console.log("Updated rules:", upDatedRuleArray);
-      reset();
+      if (editingRule && editingIndex !== null) {
+        // Update existing rule
+        updatedRules.updateRule(editingIndex, newRule);
+        console.log("Updating rule at index:", editingIndex);
+        reset(DEFAULT_FORM_VALUES);
+        onCancelEdit(); // Clear editing state
+      } else {
+        // Create new rule
+        updatedRules.addRule(newRule);
+        console.log("Just added:", newRule);
+        reset(DEFAULT_FORM_VALUES);
+      }
+      setRules(updatedRules);
+      formatRules(updatedRules);
     } catch (error) {
-      console.error("Error creating rule:", error);
+      console.error("Error saving rule:", error);
     }
   };
+
   return (
     <div>
       <form className="rule-form" onSubmit={handleSubmit(onSubmit)}>
@@ -145,15 +115,7 @@ export const Form = () => {
               name="weekdays"
               control={control}
               render={({ field: { onChange, value } }) => {
-                const weekdaysData = [
-                  { value: Weekdays.Monday, label: "Monday", id: "monday" },
-                  { value: Weekdays.Tuesday, label: "Tuesday", id: "tuesday" },
-                  { value: Weekdays.Wednesday, label: "Wednesday", id: "wednesday" },
-                  { value: Weekdays.Thursday, label: "Thursday", id: "thursday" },
-                  { value: Weekdays.Friday, label: "Friday", id: "friday" },
-                  { value: Weekdays.Saturday, label: "Saturday", id: "saturday" },
-                  { value: Weekdays.Sunday, label: "Sunday", id: "sunday" },
-                ];
+                const weekdaysData = getWeekdayFormData();
 
                 const handleWeekdayChange = (dayValue: Weekdays, checked: boolean) => {
                   const currentValue = value || [];
@@ -194,10 +156,22 @@ export const Form = () => {
           />
 
           <div className="form-actions">
-            <button type="submit">Create Rule</button>
-            <button type="button" onClick={() => reset()}>
-              Reset Form
-            </button>
+            <button type="submit">{editingRule ? "Save Changes" : "Create Rule"}</button>
+            {editingRule ? (
+              <button
+                type="button"
+                onClick={() => {
+                  reset(DEFAULT_FORM_VALUES);
+                  onCancelEdit();
+                }}
+              >
+                Cancel Edit
+              </button>
+            ) : (
+              <button type="button" onClick={() => reset(DEFAULT_FORM_VALUES)}>
+                Reset Form
+              </button>
+            )}
           </div>
         </fieldset>
       </form>
