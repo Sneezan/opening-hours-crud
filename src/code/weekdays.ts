@@ -9,59 +9,38 @@ export enum Weekdays {
   Sunday = 0b1000000, // 64
 }
 
-// Helper function to convert weekdays bit flags to array of Weekdays enums
-export const getWeekdayEnums = (weekdays: Weekdays): Weekdays[] => {
-  return [
-    Weekdays.Monday,
-    Weekdays.Tuesday,
-    Weekdays.Wednesday,
-    Weekdays.Thursday,
-    Weekdays.Friday,
-    Weekdays.Saturday,
-    Weekdays.Sunday,
-  ].filter((day) => weekdays & day);
+// Ordered array of weekdays (for iteration)
+const WEEKDAYS_ARRAY: Weekdays[] = [
+  Weekdays.Monday,
+  Weekdays.Tuesday,
+  Weekdays.Wednesday,
+  Weekdays.Thursday,
+  Weekdays.Friday,
+  Weekdays.Saturday,
+  Weekdays.Sunday,
+];
+
+const WEEKDAY_NAMES: Record<Weekdays, string> = {
+  [Weekdays.Monday]: "Monday",
+  [Weekdays.Tuesday]: "Tuesday",
+  [Weekdays.Wednesday]: "Wednesday",
+  [Weekdays.Thursday]: "Thursday",
+  [Weekdays.Friday]: "Friday",
+  [Weekdays.Saturday]: "Saturday",
+  [Weekdays.Sunday]: "Sunday",
+  [Weekdays.All]: "All",
 };
 
-// Helper function to convert weekdays bit flags to readable day names using bitmap
-export const getWeekdayNames = (weekdays: Weekdays): string[] => {
-  return getWeekdayEnums(weekdays).map((day) => getWeekdayName(day));
-};
+export const getWeekdayName = (weekday: Weekdays): string => WEEKDAY_NAMES[weekday] ?? "";
 
-// Helper function to get weekday name from enum
-export const getWeekdayName = (weekday: Weekdays): string => {
-  switch (weekday) {
-    case Weekdays.Monday:
-      return "Monday";
-    case Weekdays.Tuesday:
-      return "Tuesday";
-    case Weekdays.Wednesday:
-      return "Wednesday";
-    case Weekdays.Thursday:
-      return "Thursday";
-    case Weekdays.Friday:
-      return "Friday";
-    case Weekdays.Saturday:
-      return "Saturday";
-    case Weekdays.Sunday:
-      return "Sunday";
-    default:
-      return "";
-  }
-};
+// Converts bitmask to array of enums
+export const getWeekdayEnums = (weekdays: Weekdays): Weekdays[] =>
+  WEEKDAYS_ARRAY.filter((day) => weekdays & day);
 
-// Helper function to get weekday data for forms
-export const getWeekdayFormData = () => {
-  return [
-    Weekdays.Monday,
-    Weekdays.Tuesday,
-    Weekdays.Wednesday,
-    Weekdays.Thursday,
-    Weekdays.Friday,
-    Weekdays.Saturday,
-    Weekdays.Sunday,
-  ].map((day) => ({
+// Form data for weekdays
+export const getWeekdayFormData = () =>
+  WEEKDAYS_ARRAY.map((day) => ({
     value: day,
     label: getWeekdayName(day),
     id: getWeekdayName(day).toLowerCase(),
   }));
-};

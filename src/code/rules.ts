@@ -12,13 +12,12 @@ export class Rules<T> {
     return this;
   }
 
-  updateRule(index: number, rule: Rule<T>) {
-    if (index >= 0 && index < this.rules.length) {
-      this.rules[index] = rule;
-      return this;
+  // Update a rule at a given index, ie updated rule stays the same priority.
+  updateRule(index: number, rule: Rule<T>): this {
+    if (index < 0 || index >= this.rules.length) {
+      throw new Error(`Index ${index} is out of bounds for rules array.`);
     }
-    throw new Error(
-      `Index ${index} is out of bounds for rules array of length ${this.rules.length}`,
-    );
+    this.rules[index] = rule;
+    return this;
   }
 }

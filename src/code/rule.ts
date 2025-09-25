@@ -1,7 +1,7 @@
 import type { Factory } from "./factory";
 import type { Weekdays } from "./weekdays";
 
-export interface RuleConfig<T> {
+interface RuleConfig<T> {
   startDate: Date | string;
   endDate: Date | string;
   startTime: Date | string;

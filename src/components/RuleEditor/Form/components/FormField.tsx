@@ -1,34 +1,17 @@
-import type React from "react";
-import { type Control, Controller } from "react-hook-form";
-import type { FormData } from "../types";
+import { Controller } from "react-hook-form";
+import styles from "../index.module.css";
+import type { FormFieldProps } from "../types";
 
-export const FormField: React.FC<{
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  type?: string;
-  placeholder?: string;
-}> = ({
-  name,
-  control,
-  label,
-  type = "text",
-  placeholder,
-}: {
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  type?: string;
-  placeholder?: string;
-}) => (
+export const FormField = ({ name, control, label, type = "text", placeholder }: FormFieldProps) => (
   <div className="form-group">
-    <fieldset>
-      <legend>{label}</legend>
+    <fieldset className={styles.formField}>
+      <legend className={styles.legend}>{label}</legend>
       <Controller
         name={name}
         control={control}
         render={({ field }) => (
           <input
+            className={styles.formFieldInput}
             {...field}
             type={type}
             id={name}

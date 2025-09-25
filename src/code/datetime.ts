@@ -3,44 +3,36 @@ import type { Rules } from "./rules";
 
 const DATE_FORMAT = "yyyy-MM-dd";
 const TIME_FORMAT = "HH:mm";
-const LOG_DATE_FORMAT = "MM-dd-yyyy";
-const LOG_TIME_FORMAT = "HH:mm:ss";
 
-// Parsing helpers: convert form input strings into Date objects
-export const parseDate = (value: string): Date => parse(value, DATE_FORMAT, new Date());
-
-export const parseTime = (value: string): Date => parse(value, TIME_FORMAT, new Date(1970, 0, 1));
-
+// Parsing helper, parses Strings -> Date objects
+// To convert form input strings to Date objects.
 export const parseRuleDates = (
   startDate: string,
   endDate: string,
   startTime: string,
   endTime: string,
 ) => ({
-  startDate: parseDate(startDate),
-  endDate: parseDate(endDate),
-  startTime: parseTime(startTime),
-  endTime: parseTime(endTime),
+  startDate: parse(startDate, DATE_FORMAT, new Date()),
+  endDate: parse(endDate, DATE_FORMAT, new Date()),
+  startTime: parse(startTime, TIME_FORMAT, new Date(1970, 0, 1)),
+  endTime: parse(endTime, TIME_FORMAT, new Date(1970, 0, 1)),
 });
 
-// --- Formatting helpers ---
-export const formatDate = (date: Date, forLog = false): string =>
-  format(date, forLog ? LOG_DATE_FORMAT : DATE_FORMAT);
+// Formatting helper, formats a Date object -> String
+// For UI display or logging purposes
+export const formatDate = (date: Date) => format(date, DATE_FORMAT);
+export const formatTime = (date: Date) => format(date, TIME_FORMAT);
 
-export const formatTime = (date: Date, forLog = false): string =>
-  format(date, forLog ? LOG_TIME_FORMAT : TIME_FORMAT);
-
-// --- Format rules for logging ---
-export const formatRules = (rules: Rules<any>) => {
+//  Format rules for clean logging
+export const formatRules = (rules: Rules<any>) =>
   console.log(
-    rules.rules.map((rule) => ({
-      startDate: formatDate(rule.startDate, true),
-      endDate: formatDate(rule.endDate, true),
-      startTime: formatTime(rule.startTime, true),
-      endTime: formatTime(rule.endTime, true),
-      weekdays: rule.weekdays,
-      state: rule.state,
-      payload: rule.payload,
+    rules.rules.map((data) => ({
+      startDate: formatDate(data.startDate),
+      endDate: formatDate(data.endDate),
+      startTime: formatTime(data.startTime),
+      endTime: formatTime(data.endTime),
+      weekdays: data.weekdays,
+      state: data.state,
+      payload: data.payload,
     })),
   );
-};

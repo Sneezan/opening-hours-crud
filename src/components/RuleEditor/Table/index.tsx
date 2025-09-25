@@ -1,24 +1,20 @@
 import { formatDate, formatTime } from "../../../code/datetime";
 import type { Rule } from "../../../code/rule";
 import type { Rules } from "../../../code/rules";
-import { getWeekdayNames } from "../../../code/weekdays";
+import { getWeekdayEnums, getWeekdayName, type Weekdays } from "../../../code/weekdays";
+import type { RulePayload } from "../Form/types";
 import styles from "./index.module.css";
 
-export const List = ({
-  rules,
-  onEditRule,
-}: {
-  rules: Rules<any>;
-  onEditRule: (rule: Rule<any>, index: number) => void;
-}) => {
+interface TableProps {
+  rules: Rules<RulePayload>;
+  onEditRule: (rule: Rule<RulePayload>, index: number) => void;
+}
+
+export const Table = ({ rules, onEditRule }: TableProps) => {
   return (
     <div className={styles.rulesList}>
-      <h2>Rules List ({rules.rules.length} rules)</h2>
-
       {rules.rules.length === 0 ? (
-        <p className={styles.noRules}>
-          No rules created yet. Use the form below to create your first rule.
-        </p>
+        <h1 className={styles.noRules}>No rules yet</h1>
       ) : (
         <div className={styles.rulesTableContainer}>
           <table className={styles.rulesTable}>
@@ -30,7 +26,6 @@ export const List = ({
                 <th>End Time</th>
                 <th>Active Days</th>
                 <th>State</th>
-                <th>Payload</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -43,9 +38,9 @@ export const List = ({
                   <td>{formatTime(rule.endTime)}</td>
                   <td>
                     <div className={styles.weekdaysList}>
-                      {getWeekdayNames(rule.weekdays).map((day, dayIndex) => (
+                      {getWeekdayEnums(rule.weekdays).map((day: Weekdays, dayIndex: number) => (
                         <span key={dayIndex} className={styles.weekdayTag}>
-                          {day}
+                          {getWeekdayName(day)}
                         </span>
                       ))}
                     </div>
@@ -58,22 +53,12 @@ export const List = ({
                     </span>
                   </td>
                   <td>
-                    {rule.payload ? (
-                      <code className={styles.payloadCode}>{JSON.stringify(rule.payload)}</code>
-                    ) : (
-                      <span className={styles.noPayload}>-</span>
-                    )}
-                  </td>
-                  <td>
                     <button
                       type="button"
                       className={styles.editButton}
                       onClick={() => onEditRule(rule, index)}
                     >
                       Edit
-                    </button>
-                    <button type="button" className={styles.deleteButton}>
-                      Delete
                     </button>
                   </td>
                 </tr>

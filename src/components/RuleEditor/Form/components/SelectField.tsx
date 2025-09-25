@@ -1,43 +1,33 @@
-import type React from "react";
-import { type Control, Controller } from "react-hook-form";
-import type { FormData } from "../types";
+import { Controller } from "react-hook-form";
+import styles from "../index.module.css";
+import type { SelectFieldProps } from "../types";
 
-export const SelectField: React.FC<{
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  options: { value: string; label: string }[];
-}> = ({
-  name,
-  control,
-  label,
-  options,
-}: {
-  name: keyof FormData;
-  control: Control<FormData>;
-  label: string;
-  options: { value: string; label: string }[];
-}) => (
-  <div className="form-group">
-    <label htmlFor={name}>{label}</label>
+export const SelectField = ({ name, control, label, options }: SelectFieldProps) => (
+  <div className={styles.stateContainer}>
+    <label className={styles.stateLabel} htmlFor={name}>
+      {label}
+    </label>
     <Controller
       name={name}
       control={control}
       render={({ field }) => (
-        <select
-          id={name}
-          value={field.value === true ? "true" : "false"}
-          onChange={(e) => field.onChange(e.target.value === "true")}
-          onBlur={field.onBlur}
-          name={field.name}
-          ref={field.ref}
-        >
-          {options.map(({ value, label }) => (
-            <option key={value} value={value}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <div className={styles.stateChips}>
+          {options.map(({ value, label: optionLabel }) => {
+            const isSelected =
+              (value === "true" && field.value === true) ||
+              (value === "false" && field.value === false);
+            return (
+              <button
+                key={value}
+                type="button"
+                className={`${styles.stateChip} ${isSelected ? (value === "true" ? styles.stateChipOpen : styles.stateChipClosed) : ""}`}
+                onClick={() => field.onChange(value === "true")}
+              >
+                {optionLabel}
+              </button>
+            );
+          })}
+        </div>
       )}
     />
   </div>

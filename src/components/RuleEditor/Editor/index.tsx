@@ -1,6 +1,15 @@
 import type { Rule } from "../../../code/rule";
 import type { Rules } from "../../../code/rules";
 import { Form } from "../Form";
+import type { RulePayload } from "../Form/types";
+
+interface EditorProps {
+  rules: Rules<RulePayload>;
+  setRules: (rules: Rules<RulePayload>) => void;
+  editingRule: Rule<RulePayload> | null;
+  editingIndex: number | null;
+  onCancelEdit: () => void;
+}
 
 export const Editor = ({
   rules,
@@ -8,13 +17,7 @@ export const Editor = ({
   editingRule,
   editingIndex,
   onCancelEdit,
-}: {
-  rules: Rules<any>;
-  setRules: (rules: Rules<any>) => void;
-  editingRule: Rule<any> | null;
-  editingIndex: number | null;
-  onCancelEdit: () => void;
-}) => {
+}: EditorProps) => {
   return (
     <div>
       <Form

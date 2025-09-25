@@ -1,12 +1,15 @@
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { formatDate, formatRules, formatTime, parseRuleDates } from "../../../code/datetime";
-import { Rule, type RuleConfig } from "../../../code/rule";
+import { Rule } from "../../../code/rule";
 import { Rules } from "../../../code/rules";
-import { getWeekdayEnums, getWeekdayFormData, type Weekdays } from "../../../code/weekdays";
+import { getWeekdayEnums } from "../../../code/weekdays";
+import { Button } from "../../Button";
 import { FormField } from "./components/FormField";
 import { SelectField } from "./components/SelectField";
-import type { FormData } from "./types";
+import { WeekdaysField } from "./components/WeekdaysField";
+import styles from "./index.module.css";
+import type { FormData, FormProps, RulePayload } from "./types";
 
 const DEFAULT_FORM_VALUES: FormData = {
   startDate: "",
@@ -17,48 +20,31 @@ const DEFAULT_FORM_VALUES: FormData = {
   state: true,
 };
 
-export const Form = ({
-  rules,
-  setRules,
-  editingRule,
-  editingIndex,
-  onCancelEdit,
-}: {
-  rules: Rules<any>;
-  setRules: (rules: Rules<any>) => void;
-  editingRule: Rule<any> | null;
-  editingIndex: number | null;
-  onCancelEdit: () => void;
-}) => {
+// Formats a Rule object -> FormData object
+// To populate the form when editing a rule
+const ruleToFormData = (rule: Rule<any>): FormData => ({
+  startDate: formatDate(rule.startDate),
+  endDate: formatDate(rule.endDate),
+  startTime: formatTime(rule.startTime),
+  endTime: formatTime(rule.endTime),
+  weekdays: getWeekdayEnums(rule.weekdays),
+  state: rule.state,
+  payload: rule.payload,
+});
+
+export const Form = ({ rules, setRules, editingRule, editingIndex, onCancelEdit }: FormProps) => {
   const { control, handleSubmit, reset } = useForm<FormData>({
     defaultValues: DEFAULT_FORM_VALUES,
   });
 
-  // Populate form when editing
+  // onEdit useEffect, populates the form when editing a rule
   useEffect(() => {
-    if (editingRule) {
-      const startDate = formatDate(editingRule.startDate);
-      const endDate = formatDate(editingRule.endDate);
-      const startTime = formatTime(editingRule.startTime);
-      const endTime = formatTime(editingRule.endTime);
-      const weekdaysArray = getWeekdayEnums(editingRule.weekdays);
-
-      reset({
-        startDate,
-        endDate,
-        startTime,
-        endTime,
-        weekdays: weekdaysArray,
-        state: editingRule.state,
-        payload: editingRule.payload,
-      });
-    }
+    if (editingRule) reset(ruleToFormData(editingRule));
   }, [editingRule, reset]);
 
   const onSubmit = (data: FormData) => {
     const weekdaysValue = data.weekdays.reduce((acc, val) => acc | val, 0);
 
-    // Parse datetime strings to Date objects
     const { startDate, endDate, startTime, endTime } = parseRuleDates(
       data.startDate,
       data.endDate,
@@ -67,7 +53,7 @@ export const Form = ({
     );
 
     try {
-      const ruleFactory = Rule.getFactory<RuleConfig<unknown>>();
+      const ruleFactory = Rule.getFactory<RulePayload>();
       const newRule = ruleFactory.make({
         startDate,
         endDate,
@@ -81,17 +67,14 @@ export const Form = ({
       const updatedRules = new Rules([...rules.rules]);
 
       if (editingRule && editingIndex !== null) {
-        // Update existing rule
         updatedRules.updateRule(editingIndex, newRule);
         console.log("Updating rule at index:", editingIndex);
-        reset(DEFAULT_FORM_VALUES);
-        onCancelEdit(); // Clear editing state
+        onCancelEdit();
       } else {
-        // Create new rule
         updatedRules.addRule(newRule);
         console.log("Just added:", newRule);
-        reset(DEFAULT_FORM_VALUES);
       }
+      reset(DEFAULT_FORM_VALUES);
       setRules(updatedRules);
       formatRules(updatedRules);
     } catch (error) {
@@ -100,78 +83,48 @@ export const Form = ({
   };
 
   return (
-    <div>
-      <form className="rule-form" onSubmit={handleSubmit(onSubmit)}>
-        <fieldset>
-          <legend>Rule Configuration</legend>
-          <FormField name="startDate" control={control} label="Start Date" type="date" />
-          <FormField name="endDate" control={control} label="End Date" type="date" />
-          <FormField name="startTime" control={control} label="Start Time" type="time" />
-          <FormField name="endTime" control={control} label="End Time" type="time" />
+    <div className={styles.formContainer}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <fieldset className={styles.fieldset}>
+          <legend className={styles.legends}>{editingRule ? "Edit Rule" : "Create Rule"}</legend>
+          <div>
+            <div className={styles.formRow}>
+              <FormField name="startDate" control={control} label="Start Date" type="date" />
+              <FormField name="endDate" control={control} label="End Date" type="date" />
+            </div>
 
-          <fieldset className="weekdays-group">
-            <legend id="weekdays-legend">Active Days</legend>
-            <Controller
-              name="weekdays"
+            <div className={styles.formRow}>
+              <FormField name="startTime" control={control} label="Start Time" type="time" />
+              <FormField name="endTime" control={control} label="End Time" type="time" />
+            </div>
+            <div className={styles.formRow}>
+              <WeekdaysField control={control} />
+            </div>
+            <SelectField
+              name="state"
               control={control}
-              render={({ field: { onChange, value } }) => {
-                const weekdaysData = getWeekdayFormData();
-
-                const handleWeekdayChange = (dayValue: Weekdays, checked: boolean) => {
-                  const currentValue = value || [];
-                  if (checked) {
-                    onChange([...currentValue, dayValue]);
-                  } else {
-                    onChange(currentValue.filter((day) => day !== dayValue));
-                  }
-                };
-
-                return (
-                  <div className="checkbox-group" role="group" aria-labelledby="weekdays-legend">
-                    {weekdaysData.map(({ value: dayValue, label, id }) => (
-                      <div key={id} className="checkbox-item">
-                        <input
-                          type="checkbox"
-                          id={id}
-                          checked={value?.includes(dayValue) || false}
-                          onChange={(e) => handleWeekdayChange(dayValue, e.target.checked)}
-                        />
-                        <label htmlFor={id}>{label}</label>
-                      </div>
-                    ))}
-                  </div>
-                );
-              }}
+              label="State"
+              options={[
+                { value: "true", label: "Open" },
+                { value: "false", label: "Closed" },
+              ]}
             />
-          </fieldset>
-
-          <SelectField
-            name="state"
-            control={control}
-            label="Rule State"
-            options={[
-              { value: "true", label: "Open" },
-              { value: "false", label: "Closed" },
-            ]}
-          />
-
-          <div className="form-actions">
-            <button type="submit">{editingRule ? "Save Changes" : "Create Rule"}</button>
-            {editingRule ? (
-              <button
-                type="button"
-                onClick={() => {
-                  reset(DEFAULT_FORM_VALUES);
-                  onCancelEdit();
-                }}
-              >
-                Cancel Edit
-              </button>
-            ) : (
-              <button type="button" onClick={() => reset(DEFAULT_FORM_VALUES)}>
-                Reset Form
-              </button>
-            )}
+          </div>
+          <div className={styles.formActions}>
+            <Button type="submit" variant="primary" size="small">
+              {editingRule ? "Save" : "Create"}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="small"
+              onClick={() => {
+                reset(DEFAULT_FORM_VALUES);
+                if (editingRule) onCancelEdit();
+              }}
+            >
+              {editingRule ? "Cancel" : "Reset"}
+            </Button>
           </div>
         </fieldset>
       </form>
