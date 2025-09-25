@@ -83,7 +83,7 @@ export const Form = ({ rules, setRules, editingRule, editingIndex, onCancelEdit 
   };
 
   return (
-    <div className={styles.formContainer}>
+    <div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <fieldset className={styles.fieldset}>
           <legend className={styles.legends}>{editingRule ? "Edit Rule" : "Create Rule"}</legend>

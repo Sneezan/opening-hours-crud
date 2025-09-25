@@ -2,6 +2,7 @@ import { formatDate, formatTime } from "../../../code/datetime";
 import type { Rule } from "../../../code/rule";
 import type { Rules } from "../../../code/rules";
 import { getWeekdayEnums, getWeekdayName, type Weekdays } from "../../../code/weekdays";
+import Button from "../../Button";
 import type { RulePayload } from "../Form/types";
 import styles from "./index.module.css";
 
@@ -53,13 +54,14 @@ export const Table = ({ rules, onEditRule }: TableProps) => {
                     </span>
                   </td>
                   <td>
-                    <button
+                    <Button
+                      variant="secondary"
+                      size="small"
                       type="button"
-                      className={styles.editButton}
                       onClick={() => onEditRule(rule, index)}
                     >
                       Edit
-                    </button>
+                    </Button>
                   </td>
                 </tr>
               ))}

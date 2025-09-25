@@ -12,7 +12,6 @@
 }
 
 .legend,
-.label,
 .stateLabel {
   color: var(--text-color);
   font-size: 12px;

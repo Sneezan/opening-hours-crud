@@ -1,8 +1,8 @@
 import type React from "react";
 import styles from "./Button.module.css";
 
-export type ButtonVariant = "primary" | "secondary" | "success" | "danger" | "ghost";
-export type ButtonSize = "small" | "medium" | "large";
+export type ButtonVariant = "primary" | "secondary";
+export type ButtonSize = "small";
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -14,7 +14,7 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 
 export const Button = ({
   variant = "primary",
-  size = "medium",
+  size = "small",
   children,
   className = "",
   rounded = false,
