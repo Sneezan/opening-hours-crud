@@ -32,7 +32,7 @@ The Rules Editor is a TypeScript React application that allows users to create, 
 
 - **React 19** with TypeScript
 - **React Hook Form** for form management
-- **Zustand** for state management
+- **Zustand** for state management  (not used)
 - **date-fns** for date manipulation
 - **Biome** for linting and formatting
 - **CSS Modules** for styling
