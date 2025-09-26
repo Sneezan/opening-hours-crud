@@ -1,46 +1,164 @@
-# Getting Started with Create React App
+# Rules Editor
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A React-based application for creating and managing time-based rules with date ranges, time windows, and weekday configurations.
 
-## Available Scripts
+## Overview
 
-In the project directory, you can run:
+The Rules Editor is a TypeScript React application that allows users to create, edit, and manage rules with the following features:
 
-### `npm start`
+- **Date Range Management**: Set start and end dates for rules
+- **Time Windows**: Define specific start and end times
+- **Weekday Selection**: Choose which days of the week the rule applies to using bit flags
+- **Rule State**: Enable or disable rules
+- **Custom Payloads**: Attach additional data to rules
+- **Priority System**: Rules are ordered by priority (last added has highest priority)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Features
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### Rule Configuration
+- **Start/End Dates**: Define the date range when the rule is active
+- **Start/End Times**: Set specific time windows within the date range
+- **Weekday Selection**: Choose specific days of the week using bit flag enumeration
+- **State Toggle**: Enable or disable individual rules
+- **Custom Payload**: Attach additional data to rules for extended functionality
 
-### `npm test`
+### User Interface
+- **Rule Table**: View all existing rules in a tabular format
+- **Rule Editor**: Create new rules or edit existing ones
+- **Form Validation**: Built-in form validation using React Hook Form
+- **Responsive Design**: Modern UI with CSS modules
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Technology Stack
 
-### `npm run build`
+- **React 19** with TypeScript
+- **React Hook Form** for form management
+- **Zustand** for state management
+- **date-fns** for date manipulation
+- **Biome** for linting and formatting
+- **CSS Modules** for styling
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+## Project Structure
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+```
+src/
+├── code/                    # Core business logic
+│   ├── rule.ts             # Rule class definition
+│   ├── rules.ts            # Rules collection management
+│   ├── weekdays.ts         # Weekday enumeration and utilities
+│   ├── datetime.ts         # Date/time parsing and formatting
+│   └── factory.ts          # Factory pattern implementation
+├── components/              # React components
+│   ├── Button/             # Reusable button component
+│   └── RuleEditor/         # Main rule editor component
+│       ├── Editor/         # Rule creation/editing form
+│       ├── Form/           # Form components and validation
+│       └── Table/          # Rules display table
+└── App.tsx                 # Main application component
+```
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Getting Started
 
-### `npm run eject`
+### Prerequisites
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+- Node.js (version 16 or higher)
+- npm or yarn
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+### Installation
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+### Development
 
-## Learn More
+Start the development server:
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+```bash
+npm start
+```
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+Open [http://localhost:3000](http://localhost:3000) to view the application in your browser.
+
+### Available Scripts
+
+- `npm start` - Runs the app in development mode
+- `npm test` - Launches the test runner
+- `npm run build` - Builds the app for production
+- `npm run biome:check` - Checks code with Biome
+- `npm run biome:lint` - Runs Biome linter
+- `npm run biome:format` - Formats code with Biome
+- `npm run biome:fix` - Fixes code issues with Biome
+
+## Usage
+
+### Creating a Rule
+
+1. Click the "+" button to open the rule editor
+2. Fill in the required fields:
+   - **Start Date**: When the rule becomes active
+   - **End Date**: When the rule expires
+   - **Start Time**: Daily start time
+   - **End Time**: Daily end time
+   - **Weekdays**: Select which days of the week the rule applies
+   - **State**: Enable or disable the rule
+3. Click "Save" to create the rule
+
+### Editing a Rule
+
+1. Click on an existing rule in the table
+2. Modify the desired fields
+3. Click "Save" to update the rule
+
+### Weekday Selection
+
+The application uses bit flags for weekday selection:
+- **Monday** = 1 (0b0000001)
+- **Tuesday** = 2 (0b0000010)
+- **Wednesday** = 4 (0b0000100)
+- **Thursday** = 8 (0b0001000)
+- **Friday** = 16 (0b0010000)
+- **Saturday** = 32 (0b0100000)
+- **Sunday** = 64 (0b1000000)
+- **All** = 127 (0b1111111)
+
+## API Reference
+
+### Rule Class
+
+```typescript
+class Rule<T> {
+  startDate: Date;
+  endDate: Date;
+  startTime: Date;
+  endTime: Date;
+  weekdays: Weekdays;
+  state: boolean;
+  payload?: T;
+}
+```
+
+### Rules Collection
+
+```typescript
+class Rules<T> {
+  rules: Rule<T>[];
+  
+  addRule(rule: Rule<T>): this;
+  updateRule(index: number, rule: Rule<T>): this;
+}
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run the linter: `npm run biome:check`
+5. Run tests: `npm test`
+6. Submit a pull request
+
+## License
+
+This project is private and proprietary.
