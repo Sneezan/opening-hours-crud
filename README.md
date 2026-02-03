@@ -2,6 +2,9 @@
 
 A React-based application for creating and managing time-based rules with date ranges, time windows, and weekday configurations.
 
+<img width="1086" height="605" alt="Screenshot 2026-02-03 at 14 20 47" src="https://github.com/user-attachments/assets/073811c9-e489-4746-ad96-a48c183c4cff" />
+
+
 ## Overview
 
 The Rules Editor is a TypeScript React application that allows users to create, edit, and manage rules with the following features:
